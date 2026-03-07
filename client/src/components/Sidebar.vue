@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
 defineProps<{
   waitingCount: number
   projectCount: number
@@ -15,22 +19,22 @@ defineProps<{
     <div class="sidebar-nav">
       <div class="nav-group">
         <div class="nav-label">Overview</div>
-        <div class="nav-item active"><span class="icon">&#9632;</span> Dashboard</div>
+        <router-link to="/" class="nav-item" :class="{ active: route.path === '/' }"><span class="icon">&#9632;</span> Dashboard</router-link>
       </div>
 
       <div class="nav-group">
         <div class="nav-label">Work</div>
-        <div class="nav-item"><span class="icon">&#9654;</span> Projects <span v-if="projectCount" class="badge warn">{{ projectCount }}</span></div>
-        <div class="nav-item"><span class="icon">&#9733;</span> Ideas</div>
-        <div class="nav-item"><span class="icon">&#10003;</span> Tasks <span v-if="waitingCount" class="badge">{{ waitingCount }}</span></div>
+        <router-link to="/projects" class="nav-item" :class="{ active: route.path.startsWith('/project') }"><span class="icon">&#9654;</span> Projects <span v-if="projectCount" class="badge warn">{{ projectCount }}</span></router-link>
+        <router-link to="/ideas" class="nav-item" :class="{ active: route.path.startsWith('/idea') }"><span class="icon">&#9733;</span> Ideas</router-link>
+        <router-link to="/tasks" class="nav-item" :class="{ active: route.path === '/tasks' }"><span class="icon">&#10003;</span> Tasks <span v-if="waitingCount" class="badge">{{ waitingCount }}</span></router-link>
       </div>
 
       <div class="nav-group">
         <div class="nav-label">System</div>
-        <div class="nav-item"><span class="icon">&#9881;</span> Status</div>
-        <div class="nav-item"><span class="icon">&#8634;</span> Cron Jobs</div>
-        <div class="nav-item"><span class="icon">&#9881;</span> Sub-Agents</div>
-        <div class="nav-item"><span class="icon">$</span> Costs</div>
+        <router-link to="/status" class="nav-item" :class="{ active: route.path === '/status' }"><span class="icon">&#9881;</span> Status</router-link>
+        <router-link to="/cron" class="nav-item" :class="{ active: route.path === '/cron' }"><span class="icon">&#8634;</span> Cron Jobs</router-link>
+        <router-link to="/agents" class="nav-item" :class="{ active: route.path === '/agents' }"><span class="icon">&#9881;</span> Sub-Agents</router-link>
+        <router-link to="/costs" class="nav-item" :class="{ active: route.path === '/costs' }"><span class="icon">$</span> Costs</router-link>
       </div>
     </div>
 
@@ -62,6 +66,7 @@ defineProps<{
   display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: var(--radius-sm);
   color: var(--text-secondary); cursor: pointer; transition: all 0.12s; font-size: 13px;
 }
+.nav-item { text-decoration: none; }
 .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
 .nav-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
 .nav-item .icon { width: 18px; text-align: center; font-size: 14px; opacity: 0.8; }
