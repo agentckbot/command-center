@@ -50,7 +50,7 @@ const designError = ref('')
 const designRequestId = ref('')
 
 // Mobile accordion state — blocked and inProgress expanded by default
-const collapsedSections = ref<Set<string>>(new Set(['approved', 'planned', 'done']))
+const collapsedSections = ref<Set<string>>(new Set(['approved', 'planned']))
 
 function toggleSection(section: string) {
   if (collapsedSections.value.has(section)) {
