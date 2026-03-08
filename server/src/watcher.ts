@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { broadcast } from './ws.js'
 
-const PROJECTS_DIR = process.env.PROJECTS_DIR || path.join(process.env.HOME || '', 'cksoft', 'projects')
+const PROJECTS_DIR = process.env.PROJECTS_DIR || path.join(process.env.HOME || '', 'projects')
 
 const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
