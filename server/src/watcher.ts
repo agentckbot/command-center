@@ -1,8 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { broadcast } from './ws.js'
-
-const PROJECTS_DIR = process.env.PROJECTS_DIR || path.join(process.env.HOME || '', 'projects')
+import { PROJECTS_DIR, OPENCLAW_DIR } from './services/paths.js'
 
 const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
@@ -46,13 +45,13 @@ export function startWatchers() {
   } catch { /* dir might not exist */ }
 
   // Watch auth-profiles.json for model cooldown state changes
-  const authProfilesPath = path.join(process.env.HOME || '', '.openclaw', 'agents', 'main', 'agent', 'auth-profiles.json')
+  const authProfilesPath = path.join(OPENCLAW_DIR, 'agents', 'main', 'agent', 'auth-profiles.json')
   try {
     fs.watch(authProfilesPath, () => debouncedBroadcast('model-status'))
   } catch { /* file might not exist */ }
 
   // Watch openclaw sessions.json for agent data
-  const sessionsPath = path.join(process.env.HOME || '', '.openclaw', 'sessions.json')
+  const sessionsPath = path.join(OPENCLAW_DIR, 'sessions.json')
   try {
     fs.watch(sessionsPath, () => debouncedBroadcast('agents'))
   } catch { /* file might not exist */ }

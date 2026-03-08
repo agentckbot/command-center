@@ -3,13 +3,9 @@ import fs from "fs/promises";
 import path from "path";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { HOME, PROJECTS_DIR } from "../services/paths.js";
+import { PROJECTS_DIR, getOpenclawDir } from "../services/paths.js";
 
 const execFileAsync = promisify(execFile);
-
-function getOpenclawDir(): string {
-  return process.env.OPENCLAW_HOME || path.join(HOME, ".openclaw");
-}
 
 export const statsRouter = Router();
 

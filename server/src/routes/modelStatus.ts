@@ -1,13 +1,9 @@
 import { Router } from "express";
 import fs from "fs/promises";
 import path from "path";
-import { HOME } from "../services/paths.js";
+import { getOpenclawDir } from "../services/paths.js";
 
 export const modelStatusRouter = Router();
-
-function getOpenclawDir(): string {
-  return process.env.OPENCLAW_HOME || path.join(HOME, ".openclaw");
-}
 
 // 30-second in-memory cache
 let cache: { data: unknown; ts: number } | null = null;

@@ -2,7 +2,7 @@ import { Router } from "express";
 import express from "express";
 import fs from "fs/promises";
 import path from "path";
-import { PROJECTS_DIR } from "../services/paths.js";
+import { HOME, PROJECTS_DIR } from "../services/paths.js";
 import { parseTasksFile } from "../services/markdown.js";
 import { broadcast } from "../ws.js";
 
@@ -11,7 +11,7 @@ waitingRouter.use(express.json());
 
 const SKIP_DIRS = ["_template", "ideas", "memory"];
 const SNOOZE_PATH = path.join(
-  process.env.DEPLOY_DIR || path.join(process.env.HOME || "/tmp", "deployments", "command-center"),
+  process.env.DEPLOY_DIR || path.join(HOME, "deployments", "command-center"),
   "snooze.json"
 );
 

@@ -1,13 +1,13 @@
 import { Router } from "express";
 import fs from "fs/promises";
 import path from "path";
-import { OPENCLAW_DIR } from "../services/paths.js";
+import { HOME, OPENCLAW_DIR } from "../services/paths.js";
 import { run } from "../services/shell.js";
 
 export const agentsRouter = Router();
 
 const TRACKER_PATH = process.env.AGENT_TRACKER || path.join(
-  process.env.HOME || "/tmp",
+  HOME,
   "deployments/command-center/agent-tracker.json"
 );
 
