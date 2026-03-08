@@ -403,6 +403,31 @@ projectDetailRouter.post("/:id/approve", async (req, res) => {
       }
     }
 
+    // If no Approved section exists, create one before Planned (or In Progress, or end of Done)
+    if (approvedEndIdx === -1) {
+      let insertBefore = -1;
+      for (let i = 0; i < lines.length; i++) {
+        const h2 = lines[i].match(/^##\s+(.+)/);
+        if (h2) {
+          const s = h2[1].toLowerCase();
+          if (s.includes("in progress") || s.includes("planned") || s.includes("blocked")) {
+            insertBefore = i;
+            break;
+          }
+        }
+      }
+      if (insertBefore === -1) insertBefore = lines.length;
+      lines.splice(insertBefore, 0, "", "## ✅ Approved", "");
+      approvedEndIdx = insertBefore + 2; // after the header and before the blank line
+      // Adjust linesToMove indices since we inserted lines before Planned
+      for (let j = 0; j < linesToMove.length; j++) {
+        if (linesToMove[j] >= insertBefore) linesToMove[j] += 3;
+      }
+      for (let j = 0; j < featureHeadersToMove.length; j++) {
+        if (featureHeadersToMove[j] >= insertBefore) featureHeadersToMove[j] += 3;
+      }
+    }
+
     // Collect lines to move (including feature header if approving whole feature)
     const taskLines = linesToMove.map(i => lines[i]);
 
