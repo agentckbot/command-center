@@ -363,7 +363,7 @@ ideaDetailRouter.post("/:id/graduate", async (req, res) => {
     const projectsMdPath = path.join(PROJECTS_DIR, "PROJECTS.md");
     try {
       let projectsMd = await fs.readFile(projectsMdPath, "utf-8");
-      const entry = `\n### ${id}\n- **Path:** ~/projects/${id}\n- **Status:** active\n- **Description:** ${idea.description || idea.title}\n- **Last worked on:** ${new Date().toISOString().slice(0, 10)}\n`;
+      const entry = `\n### ${id}\n- **Path:** ~/cksoft/projects/${id}\n- **Status:** active\n- **Description:** ${idea.description || idea.title}\n- **Last worked on:** ${new Date().toISOString().slice(0, 10)}\n`;
       projectsMd += entry;
       await fs.writeFile(projectsMdPath, projectsMd, "utf-8");
     } catch {
