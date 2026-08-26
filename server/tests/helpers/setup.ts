@@ -3,6 +3,7 @@ import { systemRouter } from "../../src/routes/system.js";
 import { statsRouter } from "../../src/routes/stats.js";
 import { projectsRouter } from "../../src/routes/projects.js";
 import { ideasRouter } from "../../src/routes/ideas.js";
+import { tradesRouter } from "../../src/routes/trades.js";
 import { waitingRouter } from "../../src/routes/waiting.js";
 import { cronRouter } from "../../src/routes/cron.js";
 import { agentsRouter } from "../../src/routes/agents.js";
@@ -21,6 +22,7 @@ export function createTestApp() {
   app.use("/api/stats", statsRouter);
   app.use("/api/projects", projectsRouter);
   app.use("/api/ideas", ideasRouter);
+  app.use("/api/trades", tradesRouter);
   app.use("/api/waiting", waitingRouter);
   app.use("/api/cron", cronRouter);
   app.use("/api/agents", agentsRouter);

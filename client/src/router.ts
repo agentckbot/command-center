@@ -9,6 +9,7 @@ import StatusView from './views/StatusView.vue'
 import CronView from './views/CronView.vue'
 import AgentsView from './views/AgentsView.vue'
 import CostsView from './views/CostsView.vue'
+import TradesView from './views/TradesView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,6 +17,7 @@ const router = createRouter({
     { path: '/', component: DashboardView },
     { path: '/projects', component: ProjectsView },
     { path: '/project/:id', component: ProjectDetailView, props: true },
+    { path: '/trades', component: TradesView },
     { path: '/ideas', component: IdeasView },
     { path: '/idea/:id', component: IdeaDetailView },
     { path: '/tasks', component: TasksView },

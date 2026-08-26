@@ -1,0 +1,179 @@
+[
+  {
+    "id": "2026-08-26-open",
+    "tradeDate": "2026-08-26",
+    "publishedAt": "2026-08-26T08:40:00-05:00",
+    "focus": "Momentum names with clean opening range setups",
+    "marketNote": "Wait for the first 5-minute range to settle before chasing any gap.",
+    "plays": [
+      {
+        "symbol": "AAPL",
+        "company": "Apple",
+        "bias": "long",
+        "entryLow": 223.4,
+        "entryHigh": 224.2,
+        "stopLoss": 221.8,
+        "targetOne": 226.1,
+        "targetTwo": 227.8,
+        "thesis": "Relative strength and liquidity make it a clean opening range continuation candidate.",
+        "setupTrigger": "Take only if price reclaims VWAP after the opening pullback.",
+        "exitPlan": "Trim at target one, move stop to entry, and close the rest by 11:15 ET if target two is not reached.",
+        "windows": [
+          { "label": "ORB", "start": "09:35 ET", "end": "10:05 ET" },
+          { "label": "Trend check", "start": "10:20 ET", "end": "11:15 ET" }
+        ]
+      },
+      {
+        "symbol": "AMD",
+        "company": "AMD",
+        "bias": "long",
+        "entryLow": 196.2,
+        "entryHigh": 197.0,
+        "stopLoss": 194.4,
+        "targetOne": 199.5,
+        "targetTwo": 201.0,
+        "thesis": "Strong participation usually gives a second push after the first pullback when semis lead.",
+        "setupTrigger": "Only if volume on the reclaim candle is above the 5-minute average.",
+        "exitPlan": "If price stalls twice under target one, reduce risk and exit before lunch.",
+        "windows": [
+          { "label": "Primary", "start": "09:40 ET", "end": "10:20 ET" },
+          { "label": "Secondary", "start": "10:45 ET", "end": "11:20 ET" }
+        ]
+      },
+      {
+        "symbol": "PLTR",
+        "company": "Palantir",
+        "bias": "short",
+        "entryLow": 42.6,
+        "entryHigh": 42.9,
+        "stopLoss": 43.6,
+        "targetOne": 41.5,
+        "targetTwo": 40.8,
+        "thesis": "Extended premarket move can unwind fast if the first reclaim fails and the tape loses momentum.",
+        "setupTrigger": "Take only on a failed retest under the opening range low.",
+        "exitPlan": "Cover one-third at target one, then trail above each 5-minute lower high.",
+        "windows": [
+          { "label": "Fade", "start": "09:45 ET", "end": "10:10 ET" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-08-23-reviewed",
+    "tradeDate": "2026-08-23",
+    "publishedAt": "2026-08-23T08:32:00-05:00",
+    "focus": "Large-cap continuation with one higher-beta breakout",
+    "marketNote": "Market breadth was strong enough to favor longs over fades.",
+    "plays": [
+      {
+        "symbol": "MSFT",
+        "company": "Microsoft",
+        "bias": "long",
+        "entryLow": 541.0,
+        "entryHigh": 542.4,
+        "stopLoss": 538.9,
+        "targetOne": 546.2,
+        "targetTwo": 549.0,
+        "thesis": "Tight premarket coil with room to trend once tech leadership confirmed.",
+        "setupTrigger": "Take on hold above the opening range high after a shallow retest.",
+        "exitPlan": "Lock partials at target one and keep the rest only if the 9 EMA stays intact.",
+        "windows": [
+          { "label": "Breakout", "start": "09:35 ET", "end": "10:10 ET" }
+        ],
+        "review": {
+          "outcome": "hit-target",
+          "resultPct": 1.35,
+          "note": "Reached target two before 10:40 ET with no deep pullback."
+        }
+      },
+      {
+        "symbol": "META",
+        "company": "Meta",
+        "bias": "long",
+        "entryLow": 684.5,
+        "entryHigh": 686.0,
+        "stopLoss": 680.9,
+        "targetOne": 691.4,
+        "targetTwo": 695.0,
+        "thesis": "Held above VWAP on the first dip while peers stayed firm.",
+        "setupTrigger": "Only after a higher low forms above VWAP.",
+        "exitPlan": "Take most off at target one if the tape starts rotating out of megacaps.",
+        "windows": [
+          { "label": "VWAP bounce", "start": "09:50 ET", "end": "10:30 ET" }
+        ],
+        "review": {
+          "outcome": "partial",
+          "resultPct": 0.58,
+          "note": "Hit target one but failed to extend, so the trailing stop took the rest."
+        }
+      },
+      {
+        "symbol": "COIN",
+        "company": "Coinbase",
+        "bias": "long",
+        "entryLow": 321.5,
+        "entryHigh": 323.2,
+        "stopLoss": 317.4,
+        "targetOne": 329.8,
+        "targetTwo": 334.5,
+        "thesis": "Higher-beta sympathy play if risk appetite stayed elevated.",
+        "setupTrigger": "Only above the premarket high with strong tape confirmation.",
+        "exitPlan": "Exit quickly if the breakout candle closes back inside the prior range.",
+        "windows": [
+          { "label": "Breakout", "start": "09:45 ET", "end": "10:05 ET" }
+        ],
+        "review": {
+          "outcome": "stopped-out",
+          "resultPct": -1.12,
+          "note": "Failed breakout; the stop preserved capital."
+        }
+      }
+    ],
+    "review": {
+      "reviewedAt": "2026-08-26T07:55:00-05:00",
+      "verdict": "mixed",
+      "note": "The large-cap setups behaved well, but the higher-beta breakout added noise without enough confirmation."
+    }
+  },
+  {
+    "id": "2026-08-21-due",
+    "tradeDate": "2026-08-21",
+    "publishedAt": "2026-08-21T08:28:00-05:00",
+    "focus": "Earnings follow-through with one reversal candidate",
+    "marketNote": "This day still needs its 3-5 day scorecard written up.",
+    "plays": [
+      {
+        "symbol": "NVDA",
+        "company": "NVIDIA",
+        "bias": "long",
+        "entryLow": 206.2,
+        "entryHigh": 208.4,
+        "stopLoss": 203.9,
+        "targetOne": 211.8,
+        "targetTwo": 214.5,
+        "thesis": "Liquidity and sentiment favored a controlled continuation setup.",
+        "setupTrigger": "Take only if the first pullback holds above the opening range midpoint.",
+        "exitPlan": "Take something off into target one and avoid holding the full size past noon.",
+        "windows": [
+          { "label": "Continuation", "start": "09:35 ET", "end": "10:15 ET" }
+        ]
+      },
+      {
+        "symbol": "SHOP",
+        "company": "Shopify",
+        "bias": "short",
+        "entryLow": 112.7,
+        "entryHigh": 113.3,
+        "stopLoss": 114.8,
+        "targetOne": 110.6,
+        "targetTwo": 109.1,
+        "thesis": "A weak bounce into prior resistance offered a fade if buyers could not reclaim VWAP.",
+        "setupTrigger": "Enter only on a lower high under VWAP.",
+        "exitPlan": "Cover quickly if the first lower high gets invalidated.",
+        "windows": [
+          { "label": "Fade", "start": "09:50 ET", "end": "10:25 ET" }
+        ]
+      }
+    ]
+  }
+]

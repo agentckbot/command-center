@@ -11,22 +11,18 @@ const router = useRouter()
 const tabs = [
   { label: 'Dashboard', icon: '&#9632;', path: '/' },
   { label: 'Projects', icon: '&#9654;', path: '/projects' },
-  { label: 'Ideas', icon: '&#9733;', path: '/ideas' },
-  { label: 'System', icon: '&#9881;', path: '/system' },
+  { label: 'Trades', icon: '$', path: '/trades' },
+  { label: 'Status', icon: '&#9881;', path: '/status' },
 ]
 
 function isActive(tab: typeof tabs[0]): boolean {
   if (tab.path === '/') return route.path === '/'
-  return route.path.startsWith(tab.path) || route.path.startsWith('/project')  && tab.path === '/projects'
+  if (tab.path === '/projects') return route.path.startsWith('/projects') || route.path.startsWith('/project')
+  return route.path.startsWith(tab.path)
 }
 
 function navigate(path: string) {
-  // For now, Projects/Ideas/System all go to dashboard since views don't exist yet
-  if (path === '/projects' || path === '/ideas' || path === '/system') {
-    router.push('/')
-  } else {
-    router.push(path)
-  }
+  router.push(path)
 }
 </script>
 
@@ -39,9 +35,9 @@ function navigate(path: string) {
       :class="{ active: isActive(tab) }"
       @click="navigate(tab.path)"
     >
-      <span class="nav-icon" :class="{ 'nav-badge': tab.label === 'Ideas' && waitingCount > 0 }">
+      <span class="nav-icon" :class="{ 'nav-badge': tab.label === 'Trades' && waitingCount > 0 }">
         <span v-html="tab.icon"></span>
-        <span v-if="tab.label === 'Ideas' && waitingCount > 0" class="badge-dot"></span>
+        <span v-if="tab.label === 'Trades' && waitingCount > 0" class="badge-dot"></span>
       </span>
       <span class="nav-label">{{ tab.label }}</span>
     </div>

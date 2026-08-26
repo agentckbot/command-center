@@ -6,6 +6,7 @@ function urlToChannels(url: string): string[] {
   if (url.match(/\/api\/projects\/[^/]+\/(git|activity|prompts)/)) return ['tasks', 'activity']
   if (url.match(/\/api\/projects\/[^/]+/)) return ['tasks', 'projects']
   if (url.includes('/api/projects')) return ['projects']
+  if (url.includes('/api/trades')) return ['ideas']
   if (url.includes('/api/agents')) return ['agents']
   if (url.includes('/api/waiting')) return ['waiting']
   if (url.includes('/api/ideas')) return ['ideas']
