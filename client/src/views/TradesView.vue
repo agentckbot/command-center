@@ -36,10 +36,14 @@ interface DayReview {
   note: string
 }
 
+type TradeRecordType = 'seeded-sample' | 'historical-verified' | 'generated-research'
+
 interface TradeEntry {
   id: string
   tradeDate: string
   publishedAt: string
+  recordType: TradeRecordType
+  sourceNote: string
   focus: string
   marketNote: string
   plays: TradePlay[]
@@ -137,6 +141,16 @@ function outcomeLabel(outcome: TradePlayReview['outcome']): string {
 function verdictClass(verdict: DayReview['verdict']): string {
   return `verdict-${verdict}`
 }
+
+function recordTypeLabel(recordType: TradeEntry['recordType']): string {
+  if (recordType === 'historical-verified') return 'Verified history'
+  if (recordType === 'generated-research') return 'Generated research'
+  return 'Sample data'
+}
+
+function reviewLabel(entry: TradeEntry): string {
+  return entry.recordType === 'seeded-sample' ? 'Sample review posted' : 'Review posted'
+}
 </script>
 
 <template>
@@ -144,7 +158,7 @@ function verdictClass(verdict: DayReview['verdict']): string {
     <div class="page-header">
       <div class="page-title-row">
         <h2>Trades</h2>
-        <span class="page-subtitle">dated day-trade journal</span>
+        <span class="page-subtitle">seeded paper-trade journal</span>
       </div>
 
       <div class="summary-pills">
@@ -174,9 +188,9 @@ function verdictClass(verdict: DayReview['verdict']): string {
     <div class="notice-card">
       <div class="notice-kicker">Research mode</div>
       <p>
-        This page is structured as a paper-trade journal: each day shows 2-3 stock setups with
-        timestamp windows, entry, stop, exit plan, and a review state 3-5 days later.
-        Verify against live market data before placing any real trade.
+        This page is structured as a paper-trade journal. Entries can be seeded samples, verified
+        historical notes, or model-generated research. Verify against live market data before
+        placing any real trade.
       </p>
     </div>
 
@@ -192,6 +206,7 @@ function verdictClass(verdict: DayReview['verdict']): string {
           </div>
           <div class="trade-badges">
             <span class="badge">{{ entry.plays.length }} setups</span>
+            <span class="badge badge-sample">{{ recordTypeLabel(entry.recordType) }}</span>
             <span class="badge" :class="statusClass(entry.reviewStatus)">{{ statusLabel(entry.reviewStatus) }}</span>
           </div>
         </div>
@@ -206,6 +221,10 @@ function verdictClass(verdict: DayReview['verdict']): string {
             <div class="meta-value">
               {{ formatDay(entry.reviewWindow.startDate) }} - {{ formatDay(entry.reviewWindow.endDate) }}
             </div>
+          </div>
+          <div class="meta-block">
+            <div class="meta-label">Record note</div>
+            <div class="meta-value meta-note">{{ entry.sourceNote }}</div>
           </div>
           <div class="meta-block">
             <div class="meta-label">Market note</div>
@@ -265,7 +284,7 @@ function verdictClass(verdict: DayReview['verdict']): string {
         <div v-if="entry.review" class="day-review">
           <div class="day-review-top">
             <div>
-              <div class="meta-label">Review posted</div>
+              <div class="meta-label">{{ reviewLabel(entry) }}</div>
               <div class="meta-value">{{ formatMoment(entry.review.reviewedAt) }}</div>
             </div>
             <span class="verdict-badge" :class="verdictClass(entry.review.verdict)">{{ entry.review.verdict }}</span>
@@ -352,6 +371,7 @@ function verdictClass(verdict: DayReview['verdict']): string {
   color: var(--text-secondary);
   white-space: nowrap;
 }
+.badge-sample { color: var(--yellow); border-color: rgba(251, 191, 36, 0.3); background: var(--yellow-dim); }
 .status-reviewed { color: var(--green); border-color: rgba(52, 211, 153, 0.3); background: var(--green-dim); }
 .status-window-open { color: var(--yellow); border-color: rgba(251, 191, 36, 0.3); background: var(--yellow-dim); }
 .status-due { color: var(--red); border-color: rgba(248, 113, 113, 0.3); background: var(--red-dim); }
@@ -359,7 +379,7 @@ function verdictClass(verdict: DayReview['verdict']): string {
 
 .trade-meta {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }

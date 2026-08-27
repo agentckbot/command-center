@@ -26,6 +26,7 @@ defineProps<{
         <div class="nav-label">Work</div>
         <router-link to="/projects" class="nav-item" :class="{ active: route.path.startsWith('/project') }"><span class="icon">&#9654;</span> Projects <span v-if="projectCount" class="badge warn">{{ projectCount }}</span></router-link>
         <router-link to="/trades" class="nav-item" :class="{ active: route.path === '/trades' }"><span class="icon">$</span> Trades</router-link>
+        <router-link to="/workout" class="nav-item" :class="{ active: route.path === '/workout' }"><span class="icon">&#9201;</span> Workout</router-link>
         <router-link to="/ideas" class="nav-item" :class="{ active: route.path.startsWith('/idea') }"><span class="icon">&#9733;</span> Ideas</router-link>
         <router-link to="/tasks" class="nav-item" :class="{ active: route.path === '/tasks' }"><span class="icon">&#10003;</span> Tasks <span v-if="waitingCount" class="badge">{{ waitingCount }}</span></router-link>
       </div>

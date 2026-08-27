@@ -2,6 +2,7 @@ import { Router } from "express";
 import { run } from "../services/shell.js";
 import fs from "fs/promises";
 import path from "path";
+import { DatabaseSync } from "node:sqlite";
 import { OPENCLAW_DIR } from "../services/paths.js";
 
 export const cronRouter = Router();
@@ -16,69 +17,119 @@ interface CronJob {
   enabled: boolean;
 }
 
+interface CronSchedule {
+  kind: string;
+  at?: string;
+  expr?: string;
+  tz?: string;
+}
+
+interface CronSourceJob {
+  id: string;
+  name?: string;
+  displayName?: string;
+  agentId?: string;
+  enabled?: boolean;
+  schedule?: CronSchedule;
+  state?: {
+    nextRunAtMs?: number;
+    lastError?: unknown;
+  };
+  nextRunAtMs?: number;
+  lastRunAtMs?: number;
+  lastRunStatus?: string;
+  lastError?: string;
+  status?: string;
+}
+
+interface CronSqliteRow {
+  job_json: string;
+  state_json: string;
+  next_run_at_ms: number | null;
+  last_run_at_ms: number | null;
+  last_run_status: string | null;
+  last_error: string | null;
+}
+
+function loadCronJobsFromSqlite(): CronSourceJob[] {
+  const sqlitePath = path.join(OPENCLAW_DIR, "state", "openclaw.sqlite");
+  const db = new DatabaseSync(sqlitePath, { readOnly: true });
+
+  try {
+    const rows = db
+      .prepare(
+        `SELECT job_json, state_json, next_run_at_ms, last_run_at_ms, last_run_status, last_error
+         FROM cron_jobs
+         ORDER BY sort_order ASC, updated_at DESC`
+      )
+      .all() as unknown as CronSqliteRow[];
+
+    return rows.map((row) => {
+      const job = JSON.parse(row.job_json) as CronSourceJob;
+      const state = JSON.parse(row.state_json || "{}") as CronSourceJob["state"];
+
+      return {
+        ...job,
+        state: {
+          ...job.state,
+          ...state,
+        },
+        nextRunAtMs: row.next_run_at_ms ?? job.nextRunAtMs ?? state?.nextRunAtMs,
+        lastRunAtMs: row.last_run_at_ms ?? undefined,
+        lastRunStatus: row.last_run_status ?? undefined,
+        lastError: row.last_error ?? undefined,
+      };
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function loadCronJobs(): Promise<CronSourceJob[]> {
+  try {
+    return loadCronJobsFromSqlite();
+  } catch {
+    // Fall back for older installs that still expose JSON or rely on the CLI.
+  }
+
+  try {
+    const cliOutput = await run("openclaw", ["cron", "list", "--json"]);
+    const payload = JSON.parse(cliOutput) as { jobs?: CronSourceJob[] };
+    return payload.jobs || [];
+  } catch {
+    const jobsPath = path.join(OPENCLAW_DIR, "cron", "jobs.json");
+    const jobsData = JSON.parse(await fs.readFile(jobsPath, "utf-8")) as {
+      jobs?: CronSourceJob[];
+    };
+    return jobsData.jobs || [];
+  }
+}
+
 cronRouter.get("/", async (_req, res) => {
   try {
-    // Try parsing the cron jobs JSON directly
-    const jobsPath = path.join(OPENCLAW_DIR, "cron", "jobs.json");
-    const jobsData = JSON.parse(await fs.readFile(jobsPath, "utf-8"));
+    const sourceJobs = await loadCronJobs();
     const jobs: CronJob[] = [];
 
-    // Also try to get run history
-    const runsDir = path.join(OPENCLAW_DIR, "cron", "runs");
-    let runFiles: string[] = [];
-    try {
-      runFiles = await fs.readdir(runsDir);
-    } catch { /* no runs dir */ }
-
-    // Build last-run map from run files
-    const lastRunMap = new Map<string, { status: string; time: string }>();
-    for (const rf of runFiles.sort().reverse()) {
-      try {
-        const runData = JSON.parse(await fs.readFile(path.join(runsDir, rf), "utf-8"));
-        const jobId = runData.jobId || runData.id;
-        if (jobId && !lastRunMap.has(jobId)) {
-          lastRunMap.set(jobId, {
-            status: runData.error ? "error" : "ok",
-            time: runData.ts || runData.startedAt || rf.replace(".json", ""),
-          });
-        }
-      } catch { /* skip bad files */ }
-    }
-
-    for (const job of jobsData.jobs || []) {
+    for (const job of sourceJobs) {
       const schedExpr = job.schedule?.expr || (job.schedule?.at ? `at ${job.schedule.at}` : "unknown");
-      const nextRunMs = job.state?.nextRunAtMs;
+      const nextRunMs = job.nextRunAtMs || job.state?.nextRunAtMs;
       const nextRun = nextRunMs ? formatRelativeTime(nextRunMs) : "—";
-
-      // Check CLI output for last run
-      const lastRun = lastRunMap.get(job.id);
+      const lastRun = job.lastRunAtMs
+        ? formatTimeShort(new Date(job.lastRunAtMs).toISOString())
+        : "—";
 
       jobs.push({
         id: job.id,
-        name: job.name || "unnamed",
-        schedule: formatSchedule(schedExpr, job.schedule),
-        lastRun: lastRun?.time ? formatTimeShort(lastRun.time) : "—",
-        lastStatus: lastRun?.status || (job.state?.lastError ? "error" : "ok"),
+        name: job.displayName || job.name || "unnamed",
+        schedule: formatSchedule(schedExpr, job.schedule || { kind: "unknown" }),
+        lastRun,
+        lastStatus:
+          job.lastRunStatus ||
+          (job.status === "error" || job.state?.lastError ? "error" : "ok"),
         nextRun,
         enabled: job.enabled !== false,
       });
     }
-
-    // Also parse CLI output for extra status info
-    try {
-      const cliOutput = await run("openclaw", ["cron", "list"]);
-      const lines = cliOutput.split("\n");
-      for (const line of lines) {
-        // Match table rows: ID Name Schedule Next Last Status
-        const match = line.match(/^(\S{36})\s+(.+?)\s{2,}(.+?)\s{2,}(.+?)\s{2,}(.+?)\s{2,}(\w+)/);
-        if (match) {
-          const existing = jobs.find((j) => j.id === match[1]);
-          if (existing) {
-            if (match[6] === "error") existing.lastStatus = "error";
-          }
-        }
-      }
-    } catch { /* CLI not available */ }
 
     res.json(jobs);
   } catch (err) {

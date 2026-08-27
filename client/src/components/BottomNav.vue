@@ -12,6 +12,7 @@ const tabs = [
   { label: 'Dashboard', icon: '&#9632;', path: '/' },
   { label: 'Projects', icon: '&#9654;', path: '/projects' },
   { label: 'Trades', icon: '$', path: '/trades' },
+  { label: 'Workout', icon: '&#9201;', path: '/workout' },
   { label: 'Status', icon: '&#9881;', path: '/status' },
 ]
 

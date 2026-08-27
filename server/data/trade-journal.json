@@ -1,10 +1,74 @@
 [
   {
+    "id": "2026-08-27-open",
+    "tradeDate": "2026-08-27",
+    "publishedAt": "2026-08-27T08:20:00-05:00",
+    "recordType": "generated-research",
+    "sourceNote": "Model-generated research for 2026-08-27 using live premarket checks captured on 2026-08-27 before the U.S. cash open; all levels require live verification before any trade.",
+    "focus": "Large-cap tech leadership remains the main opening focus with selective strength in AAPL and MSFT versus relative weakness in NVDA.",
+    "marketNote": "Premarket checks on 2026-08-27 showed SPY near 766.08, QQQ near 711.37, AAPL near 313.45, MSFT near 496.37, and NVDA near 209.66 ahead of the 09:30 ET open.",
+    "plays": [
+      {
+        "symbol": "AAPL",
+        "company": "Apple",
+        "bias": "long",
+        "entryLow": 312.8,
+        "entryHigh": 314.2,
+        "stopLoss": 310.4,
+        "targetOne": 317.5,
+        "targetTwo": 320.8,
+        "thesis": "Apple showed cleaner premarket relative strength than the broad tape, making it a candidate for an opening-range continuation if buyers hold the first pullback.",
+        "setupTrigger": "Take only if price holds above VWAP after the first 5-minute rotation and reclaims the opening range high on solid volume.",
+        "exitPlan": "Trim into target one, raise the stop toward breakeven after confirmation, and flatten the rest by 11:30 ET if momentum stalls.",
+        "windows": [
+          { "label": "Opening range", "start": "09:35 ET", "end": "10:05 ET" },
+          { "label": "Trend continuation", "start": "10:15 ET", "end": "11:30 ET" }
+        ]
+      },
+      {
+        "symbol": "MSFT",
+        "company": "Microsoft",
+        "bias": "long",
+        "entryLow": 494.8,
+        "entryHigh": 497.2,
+        "stopLoss": 491.5,
+        "targetOne": 501.8,
+        "targetTwo": 505.6,
+        "thesis": "Microsoft entered the session with firm premarket participation, which can support a measured breakout if QQQ stays constructive after the open.",
+        "setupTrigger": "Engage only on a higher low above VWAP or a clean hold above the opening range high after 09:40 ET.",
+        "exitPlan": "Pay yourself at target one, keep the remainder only while higher lows remain intact, and step aside if QQQ loses its first-hour range.",
+        "windows": [
+          { "label": "Primary breakout", "start": "09:40 ET", "end": "10:20 ET" },
+          { "label": "Secondary hold", "start": "10:30 ET", "end": "11:20 ET" }
+        ]
+      },
+      {
+        "symbol": "NVDA",
+        "company": "NVIDIA",
+        "bias": "short",
+        "entryLow": 208.9,
+        "entryHigh": 210.4,
+        "stopLoss": 213.1,
+        "targetOne": 205.2,
+        "targetTwo": 202.4,
+        "thesis": "NVIDIA was softer than the other megacaps in premarket trade, so a failed bounce can offer a liquid short if sellers defend VWAP early.",
+        "setupTrigger": "Take only if the first rebound fails below VWAP or the stock loses the opening range low with continued semiconductor weakness.",
+        "exitPlan": "Cover partial size at target one, trail above new 5-minute lower highs, and abandon the short if the stock reclaims VWAP with breadth improving.",
+        "windows": [
+          { "label": "Failed bounce", "start": "09:35 ET", "end": "10:10 ET" },
+          { "label": "Breakdown follow-through", "start": "10:15 ET", "end": "11:15 ET" }
+        ]
+      }
+    ]
+  },
+  {
     "id": "2026-08-26-open",
     "tradeDate": "2026-08-26",
     "publishedAt": "2026-08-26T08:40:00-05:00",
-    "focus": "Momentum names with clean opening range setups",
-    "marketNote": "Wait for the first 5-minute range to settle before chasing any gap.",
+    "recordType": "seeded-sample",
+    "sourceNote": "Seeded sample entry for workflow testing. This is not a real archived alert for August 26, 2026.",
+    "focus": "Sample momentum board with clean opening-range setups",
+    "marketNote": "Illustrative scenario: wait for the first 5-minute range to settle before chasing any gap.",
     "plays": [
       {
         "symbol": "AAPL",
@@ -62,8 +126,10 @@
     "id": "2026-08-23-reviewed",
     "tradeDate": "2026-08-23",
     "publishedAt": "2026-08-23T08:32:00-05:00",
-    "focus": "Large-cap continuation with one higher-beta breakout",
-    "marketNote": "Market breadth was strong enough to favor longs over fades.",
+    "recordType": "seeded-sample",
+    "sourceNote": "Seeded sample entry with a hypothetical review. It demonstrates the 3-5 day scorecard flow only.",
+    "focus": "Sample large-cap continuation board with one higher-beta breakout",
+    "marketNote": "Illustrative scenario: modeled as a session where breadth favored longs over fades.",
     "plays": [
       {
         "symbol": "MSFT",
@@ -83,7 +149,7 @@
         "review": {
           "outcome": "hit-target",
           "resultPct": 1.35,
-          "note": "Reached target two before 10:40 ET with no deep pullback."
+          "note": "Sample review outcome: modeled as reaching target two before 10:40 ET with no deep pullback."
         }
       },
       {
@@ -104,7 +170,7 @@
         "review": {
           "outcome": "partial",
           "resultPct": 0.58,
-          "note": "Hit target one but failed to extend, so the trailing stop took the rest."
+          "note": "Sample review outcome: modeled as hitting target one before the trailing stop took the rest."
         }
       },
       {
@@ -125,22 +191,24 @@
         "review": {
           "outcome": "stopped-out",
           "resultPct": -1.12,
-          "note": "Failed breakout; the stop preserved capital."
+          "note": "Sample review outcome: modeled as a failed breakout where the stop preserved capital."
         }
       }
     ],
     "review": {
       "reviewedAt": "2026-08-26T07:55:00-05:00",
       "verdict": "mixed",
-      "note": "The large-cap setups behaved well, but the higher-beta breakout added noise without enough confirmation."
+      "note": "Sample scorecard: the large-cap setups behaved better than the higher-beta breakout in this hypothetical walkthrough."
     }
   },
   {
     "id": "2026-08-21-due",
     "tradeDate": "2026-08-21",
     "publishedAt": "2026-08-21T08:28:00-05:00",
-    "focus": "Earnings follow-through with one reversal candidate",
-    "marketNote": "This day still needs its 3-5 day scorecard written up.",
+    "recordType": "seeded-sample",
+    "sourceNote": "Seeded sample entry awaiting a sample review write-up. Not a verified historical call.",
+    "focus": "Sample earnings follow-through board with one reversal candidate",
+    "marketNote": "Illustrative scenario: this sample day still needs its mock 3-5 day scorecard written up.",
     "plays": [
       {
         "symbol": "NVDA",

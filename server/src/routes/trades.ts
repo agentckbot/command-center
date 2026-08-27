@@ -38,10 +38,17 @@ interface DayReview {
   note: string;
 }
 
+type TradeRecordType =
+  | "seeded-sample"
+  | "historical-verified"
+  | "generated-research";
+
 interface TradeJournalEntry {
   id: string;
   tradeDate: string;
   publishedAt: string;
+  recordType: TradeRecordType;
+  sourceNote: string;
   focus: string;
   marketNote: string;
   plays: TradePlay[];
@@ -117,8 +124,21 @@ function summarizePlays(plays: TradePlay[]) {
 
 async function loadJournal(): Promise<TradeJournalEntry[]> {
   const raw = await fs.readFile(TRADE_JOURNAL_FILE, "utf-8");
-  const entries = JSON.parse(raw) as TradeJournalEntry[];
-  return entries.sort((left, right) => {
+  const entries = JSON.parse(raw) as Array<
+    Omit<TradeJournalEntry, "recordType" | "sourceNote"> &
+      Partial<Pick<TradeJournalEntry, "recordType" | "sourceNote">>
+  >;
+  return entries
+    .map(
+      (entry): TradeJournalEntry => ({
+        ...entry,
+        recordType: entry.recordType ?? "seeded-sample",
+        sourceNote:
+          entry.sourceNote ??
+          "Seeded sample entry for workflow testing. This is not a verified historical trade alert.",
+      })
+    )
+    .sort((left, right) => {
     const byDate = right.tradeDate.localeCompare(left.tradeDate);
     if (byDate !== 0) return byDate;
     return right.publishedAt.localeCompare(left.publishedAt);
