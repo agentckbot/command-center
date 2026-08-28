@@ -25,9 +25,17 @@ interface WorkoutStorage {
   savedRoutines: SavedWorkoutRoutine[]
 }
 
+interface PortableWorkoutFile {
+  version: number
+  exportedAt: string
+  routine: WorkoutDraft
+}
+
 type AudioContextCtor = typeof AudioContext
+type SaveNoticeTone = 'success' | 'error'
 
 const STORAGE_KEY = 'command-center-workout-v1'
+const EXPORT_VERSION = 1
 const MAX_STEPS = 10
 const MIN_DURATION_SEC = 5
 const MAX_SAVED_ROUTINES = 24
@@ -73,16 +81,16 @@ const loaded = ref(false)
 const savedRoutines = ref<SavedWorkoutRoutine[]>([])
 const activeRoutineId = ref<string | null>(null)
 const saveNotice = ref('')
+const saveNoticeTone = ref<SaveNoticeTone>('success')
+const timerLocked = ref(false)
+const importInput = ref<HTMLInputElement | null>(null)
 
 const currentStep = computed(() => steps.value[currentStepIndex.value] ?? null)
 const nextStep = computed(() => steps.value[currentStepIndex.value + 1] ?? null)
 const totalDurationSec = computed(() => steps.value.reduce((sum, step) => sum + step.durationSec, 0))
 const canAddMore = computed(() => steps.value.length < MAX_STEPS)
 const savedRoutineCount = computed(() => savedRoutines.value.length)
-const editLocked = computed(() => {
-  if (!currentStep.value) return false
-  return running.value || currentStepIndex.value > 0 || finished.value || remainingMs.value !== currentStep.value.durationSec * 1000
-})
+const editLocked = computed(() => running.value || timerLocked.value || finished.value)
 const activeProgress = computed(() => {
   if (!currentStep.value) return 0
   const total = currentStep.value.durationSec * 1000
@@ -102,6 +110,11 @@ function defaultName(type: WorkoutStepType, index: number): string {
 
 function sanitizeRoutineName(name: string): string {
   return name.trim() || 'Workout Set'
+}
+
+function setSaveNotice(message: string, tone: SaveNoticeTone = 'success') {
+  saveNotice.value = message
+  saveNoticeTone.value = tone
 }
 
 function normalizeStoredSteps(rawSteps: unknown): WorkoutStep[] {
@@ -132,7 +145,7 @@ function cloneSteps(rawSteps: WorkoutStep[]): WorkoutStep[] {
 function createDraftPayload(): WorkoutDraft {
   return {
     routineName: sanitizeRoutineName(routineName.value),
-    steps: steps.value,
+    steps: normalizeStoredSteps(steps.value),
   }
 }
 
@@ -165,6 +178,10 @@ function clearTicker() {
 function resetCountdownState(stepId: string | null = currentStep.value?.id ?? null) {
   activeCountdownStepId = stepId
   lastCountdownSecondPlayed = null
+}
+
+function isInteractiveSelectionTarget(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement && !!target.closest('button, input, select, label, a, textarea')
 }
 
 function syncAfterEdit(preferredStepId: string | null = currentStep.value?.id ?? null) {
@@ -232,6 +249,7 @@ function saveWorkout() {
 
 function clearSaveNotice() {
   saveNotice.value = ''
+  saveNoticeTone.value = 'success'
 }
 
 function saveCurrentRoutine() {
@@ -251,7 +269,7 @@ function saveCurrentRoutine() {
   const remaining = savedRoutines.value.filter((routine) => routine.id !== snapshot.id)
   savedRoutines.value = [snapshot, ...remaining].slice(0, MAX_SAVED_ROUTINES)
   activeRoutineId.value = snapshot.id
-  saveNotice.value = existing ? `Updated "${name}"` : `Saved "${name}"`
+  setSaveNotice(existing ? `Updated "${name}"` : `Saved "${name}"`)
 }
 
 function loadSavedRoutine(routineId: string) {
@@ -265,7 +283,7 @@ function loadSavedRoutine(routineId: string) {
   steps.value = cloneSteps(routine.steps)
   activeRoutineId.value = routine.id
   resetWorkout()
-  saveNotice.value = `Loaded "${routine.routineName}"`
+  setSaveNotice(`Loaded "${routine.routineName}"`)
 }
 
 function deleteSavedRoutine(routineId: string) {
@@ -276,7 +294,7 @@ function deleteSavedRoutine(routineId: string) {
   if (activeRoutineId.value === routineId) {
     activeRoutineId.value = null
   }
-  saveNotice.value = `Deleted "${routine.routineName}"`
+  setSaveNotice(`Deleted "${routine.routineName}"`)
 }
 
 function createNewDraft() {
@@ -293,7 +311,94 @@ function createNewDraft() {
     createStep('exercise', 'Exercise 3', 45),
   ]
   resetWorkout()
-  saveNotice.value = 'Started a fresh draft'
+  setSaveNotice('Started a fresh draft')
+}
+
+function selectStep(index: number, event?: Event) {
+  if (running.value) return
+  if (event && isInteractiveSelectionTarget(event.target)) return
+  if (index < 0 || index >= steps.value.length) return
+
+  clearTicker()
+  running.value = false
+  finished.value = false
+  currentStepIndex.value = index
+  resetClockToCurrentStep()
+  resetCountdownState()
+}
+
+function sanitizeFileName(name: string): string {
+  return sanitizeRoutineName(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'workout-set'
+}
+
+function exportCurrentRoutine() {
+  if (typeof window === 'undefined') return
+
+  const payload: PortableWorkoutFile = {
+    version: EXPORT_VERSION,
+    exportedAt: new Date().toISOString(),
+    routine: createDraftPayload(),
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${sanitizeFileName(payload.routine.routineName)}.workout.json`
+  link.click()
+  window.setTimeout(() => window.URL.revokeObjectURL(url), 0)
+  setSaveNotice(`Exported "${payload.routine.routineName}"`)
+}
+
+function openImportPicker() {
+  importInput.value?.click()
+}
+
+function parseImportedRoutine(raw: unknown): WorkoutDraft | null {
+  if (!raw || typeof raw !== 'object') return null
+
+  const topLevel = raw as { routine?: unknown; draft?: unknown }
+  const candidate = topLevel.routine ?? topLevel.draft ?? raw
+  if (!candidate || typeof candidate !== 'object') return null
+
+  const routine = candidate as Partial<WorkoutDraft>
+  if (!Array.isArray(routine.steps) || routine.steps.length === 0) return null
+
+  return {
+    routineName: sanitizeRoutineName(typeof routine.routineName === 'string' ? routine.routineName : 'Imported Workout'),
+    steps: normalizeStoredSteps(routine.steps),
+  }
+}
+
+async function importRoutineFile(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  try {
+    const parsed = JSON.parse(await file.text()) as unknown
+    const imported = parseImportedRoutine(parsed)
+    if (!imported) {
+      throw new Error('invalid routine file')
+    }
+
+    clearTicker()
+    running.value = false
+    finished.value = false
+    timerLocked.value = false
+    activeRoutineId.value = null
+    routineName.value = imported.routineName
+    steps.value = imported.steps
+    resetWorkout()
+    setSaveNotice(`Imported "${imported.routineName}"`)
+  } catch {
+    setSaveNotice('Could not import that workout file', 'error')
+  } finally {
+    input.value = ''
+  }
 }
 
 function getAudioCtor(): AudioContextCtor | undefined {
@@ -411,6 +516,7 @@ function startWorkout() {
     resetCountdownState()
   }
   finished.value = false
+  timerLocked.value = true
   running.value = true
   void ensureAudioReady()
   startTicker(remainingMs.value || currentStep.value.durationSec * 1000)
@@ -427,6 +533,7 @@ function resetWorkout() {
   clearTicker()
   running.value = false
   finished.value = false
+  timerLocked.value = false
   currentStepIndex.value = 0
   resetClockToCurrentStep()
   resetCountdownState()
@@ -616,10 +723,12 @@ onBeforeUnmount(() => {
         <div class="panel-header">
           <div>
             <span class="panel-title">Routine Builder</span>
-            <span class="panel-count">draft + saved sets stay in this browser</span>
+            <span class="panel-count">local by default, portable with export/import</span>
           </div>
           <div class="builder-actions">
             <button class="btn btn-accent" :disabled="running" @click="saveCurrentRoutine">Save set</button>
+            <button class="btn" :disabled="running" @click="exportCurrentRoutine">Export</button>
+            <button class="btn" :disabled="running" @click="openImportPicker">Import</button>
             <button class="btn" :disabled="running" @click="createNewDraft">New draft</button>
             <button class="btn" :disabled="!canAddMore || editLocked" @click="addStep('exercise')">Add exercise</button>
             <button class="btn" :disabled="!canAddMore || editLocked" @click="addStep('pause')">Add pause</button>
@@ -627,6 +736,13 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="builder-body">
+          <input
+            ref="importInput"
+            class="hidden-file-input"
+            type="file"
+            accept=".json,application/json"
+            @change="importRoutineFile"
+          />
           <label class="field">
             <span class="field-label">Set name</span>
             <input v-model="routineName" class="text-input set-name" :disabled="editLocked" maxlength="60" />
@@ -635,7 +751,14 @@ onBeforeUnmount(() => {
             <span class="save-note">
               {{ activeRoutineId ? 'Editing a saved set.' : 'Editing an unsaved draft.' }}
             </span>
-            <span v-if="saveNotice" class="save-flash" @click="clearSaveNotice">{{ saveNotice }}</span>
+            <span
+              v-if="saveNotice"
+              class="save-flash"
+              :class="{ error: saveNoticeTone === 'error' }"
+              @click="clearSaveNotice"
+            >
+              {{ saveNotice }}
+            </span>
           </div>
 
           <div class="step-list">
@@ -643,6 +766,8 @@ onBeforeUnmount(() => {
               v-for="(step, index) in steps"
               :key="step.id"
               class="step-card"
+              tabindex="0"
+              role="button"
               :class="[
                 `step-${step.type}`,
                 {
@@ -650,6 +775,9 @@ onBeforeUnmount(() => {
                   done: index < currentStepIndex || finished,
                 },
               ]"
+              @click="selectStep(index, $event)"
+              @keydown.enter.prevent="selectStep(index)"
+              @keydown.space.prevent="selectStep(index)"
             >
               <div class="step-top">
                 <div class="step-index">{{ index + 1 }}</div>
@@ -795,6 +923,7 @@ onBeforeUnmount(() => {
                 active: index === currentStepIndex && !finished,
                 done: index < currentStepIndex || finished,
               }"
+              @click="selectStep(index)"
             >
               <div class="timeline-marker">{{ index + 1 }}</div>
               <div class="timeline-copy">
@@ -880,6 +1009,7 @@ onBeforeUnmount(() => {
 }
 
 .builder-body { padding: 16px; }
+.hidden-file-input { display: none; }
 .field { display: block; margin-bottom: 14px; }
 .save-meta-row {
   display: flex;
@@ -901,6 +1031,11 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   padding: 4px 8px;
   cursor: pointer;
+}
+.save-flash.error {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.28);
 }
 .field-label {
   display: block;
